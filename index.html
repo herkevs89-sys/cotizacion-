@@ -833,7 +833,7 @@ input.locked{ background:#eef2ee; color:var(--brand-d); font-weight:600 }
         </div>
         <div class="cl-grid">
           <div class="cl-left">
-            <input id="cl-search" class="cl-search" placeholder="Buscar por nombre, No. de servicio CFE o dirección…" />
+            <input id="cl-search" class="cl-search" placeholder="Buscar por nombre, servicio, No. de CFE o dirección…" />
             <div id="cl-list" class="cl-list"></div>
           </div>
           <div class="cl-right" id="cl-detail">
@@ -1998,10 +1998,14 @@ function openClienteForm(c){
       <div class="fgroup">
         <h4>Servicio e instalación</h4>
         ${sel('cf_svc','Servicio contratado', SERVICE_LABEL[tipoDe(e)]||e.servicioContratado||SERVICE_LABEL.solar, Object.values(SERVICE_LABEL))}
-        ${inp('cf_rpu','No. de servicio CFE (RPU)',e.numServicioCFE)}
+        <div class="solo-solar" style="${esSolar(e)?'':'display:none'}">
+          ${inp('cf_rpu','No. de servicio CFE (RPU)',e.numServicioCFE)}
+        </div>
         ${tar('cf_inst','Lo que se instaló',e.loInstalado)}
-        ${tar('cf_rel','Relación de instalación (CFE vs instalado)',e.relacionCFE)}
-        ${inp('cf_cap','Capacidad instalada (kW)',e.capacidadKW,'number')}
+        <div class="solo-solar" style="${esSolar(e)?'':'display:none'}">
+          ${tar('cf_rel','Relación de instalación (CFE vs instalado)',e.relacionCFE)}
+          ${inp('cf_cap','Capacidad instalada (kW)',e.capacidadKW,'number')}
+        </div>
       </div>
       <div class="fgroup">
         <h4>Equipos e instalación</h4>
@@ -2034,6 +2038,7 @@ function openClienteForm(c){
   document.getElementById('cf_svc').addEventListener('change',ev=>{
     const isSolar=ev.target.value===SERVICE_LABEL.solar;
     document.getElementById('cf_hilos_wrap').style.display=isSolar?'':'none';
+    document.querySelectorAll('#modal-root .solo-solar').forEach(function(el){ el.style.display=isSolar?'':'none'; });
   });
   const close=()=>document.getElementById('modal-back').classList.remove('open');
   document.getElementById('cf_x').onclick=close;
@@ -2046,8 +2051,11 @@ function openClienteForm(c){
       nombre:g('cf_nombre'), telefono:g('cf_tel'), correo:g('cf_correo'), rfc:g('cf_rfc'),
       calle:g('cf_calle'), numExt:g('cf_next'), numInt:g('cf_nint'), cp:g('cf_cp'),
       colonia:g('cf_col'), municipio:g('cf_mun'), estado:g('cf_edo'),
-      tipoServicio, servicioContratado:svcLabel, numServicioCFE:g('cf_rpu'),
-      loInstalado:g('cf_inst'), relacionCFE:g('cf_rel'), capacidadKW:g('cf_cap'),
+      tipoServicio, servicioContratado:svcLabel,
+      numServicioCFE: tipoServicio==='solar'?g('cf_rpu'):'',
+      loInstalado:g('cf_inst'),
+      relacionCFE: tipoServicio==='solar'?g('cf_rel'):'',
+      capacidadKW: tipoServicio==='solar'?g('cf_cap'):'',
       proveedor:g('cf_prov'), fechaCompra:g('cf_fcompra'), fechaInstalacion:g('cf_finst'), instalador:g('cf_instalador'),
       cambioHilos: tipoServicio==='solar' && document.getElementById('cf_hilos').checked,
       ciudadCarta:g('cf_ciudad'), tramite:g('cf_tramite'), gestor:ECO.gestor,
